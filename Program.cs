@@ -8,30 +8,29 @@ using MessagePack.NodaTime;
 using MessagePack.Resolvers;
 using NodaTime;
 using Vogen;
-
 var resolver = CompositeResolver.Create(
     NodatimeResolver.Instance,
     ContractlessStandardResolver.Instance
 );
 MessagePackSerializer.DefaultOptions = new(resolver);
-var r = new TestRequest(1, 2, "fuck", new(321), IPAddress.Parse("1.2.3.4"), SystemClock.Instance.GetCurrentInstant(), new(100), Fuck.From(3));
+var r = new TestRequest(1, 2, "fuck", new(321), IPAddress.Parse("1.2.3.4"), SystemClock.Instance.GetCurrentInstant(), null, new(100), Fuck.From(3), Fuck.From(321));
 Console.WriteLine($"r: {r}");
 
-// var bytes = MessagePackSerializer.Serialize(r);
-// Console.WriteLine($"bytes: {bytes.Length}");
+var bytes = MessagePackSerializer.Serialize(r);
+Console.WriteLine($"bytes: {bytes.Length}");
 
-var mpBytes = MemoryPackSerializer.Serialize(r);
-Console.WriteLine($"mpBytes: {mpBytes.Length}");
+// var mpBytes = MemoryPackSerializer.Serialize(r);
+// Console.WriteLine($"mpBytes: {mpBytes.Length}");
 
-// var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
-// Console.WriteLine($"d: {d}");
+var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
+Console.WriteLine($"d: {d}");
 
-var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
-Console.WriteLine($"mpD: {mpD}");
+// var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
+// Console.WriteLine($"mpD: {mpD}");
 
 Console.WriteLine("Hello, World!");
 
-[MemoryPackable]
+// [MemoryPackable]
 public partial record TestRequest(
     int X,
     int Y,
@@ -41,9 +40,12 @@ public partial record TestRequest(
     IPAddress Ip,
     [property: InstantFormatter]
     Instant Now,
+    [property: InstantFormatter]
+    Instant? Now2,
     SomeVo SomeVo,
-    [property: FuckFormatter]
-    Fuck Fuck
+    [property: ValueObjectFormatter<Fuck, int>]
+    Fuck Fuck,
+    Fuck? Fuck2
 );
 [MemoryPackable]
 public partial record Another(
@@ -55,7 +57,7 @@ public partial record Another(
 public readonly record struct SomeVo(int Value);
 
 [ValueObject<int>]
-public readonly partial struct Fuck;
+public readonly partial struct Fuck : IValueObject<Fuck, int>;
 
 public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 {
@@ -73,6 +75,8 @@ public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
         return Fuck.From(value!);
     }
 }
+
+// public class IPAddressMsgPackFormatter
 
 public class IPAddressFormatter : MemoryPackCustomFormatterAttribute<IPAddress>
 {
@@ -105,21 +109,28 @@ public class IPAddressFormatter : MemoryPackCustomFormatterAttribute<IPAddress>
     }
 }
 
-[AttributeUsage(AttributeTargets.All)]
-public class FuckFormatter : MemoryPackCustomFormatterAttribute<Fuck>
+public interface IValueObject<TSelf, TPrimitive>
 {
-    public override IMemoryPackFormatter<Fuck> GetFormatter() => new Formatter();
+    abstract static TSelf From(TPrimitive primitive);
+    TPrimitive Value { get; }
+}
 
-    private class Formatter : MemoryPackFormatter<Fuck>
+[AttributeUsage(AttributeTargets.All)]
+public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAttribute<TVo>
+    where TVo : IValueObject<TVo, TPrimitive>
+{
+    public override IMemoryPackFormatter<TVo> GetFormatter() => new Formatter();
+
+    private class Formatter : MemoryPackFormatter<TVo>
     {
-        public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Fuck value)
+        public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TVo value)
         {
             writer.WriteValue(value.Value);
         }
 
-        public override void Deserialize(ref MemoryPackReader reader, scoped ref Fuck value)
+        public override void Deserialize(ref MemoryPackReader reader, scoped ref TVo value)
         {
-            value = Fuck.From(reader.ReadValue<int>()!);
+            value = TVo.From(reader.ReadValue<TPrimitive>()!);
         }
     }
 }
