@@ -41,11 +41,16 @@ BenchmarkRunner.Run<MyBenchs>();
 Console.WriteLine("Hello, World!");
 
 // [MemoryPackable]
+[MessagePackObject]
 public partial record TestRequest(
+    [property: Key(0)]
     int X,
+    [property: Key(1)]
     int Y,
-    Fuck Fuck,
-    Instant Now
+    [property: Key(2)]
+    Guid Guid,
+    [property: Key(3)]
+    DateTime Foo
 );
 [MemoryPackable]
 public partial record Another(
@@ -147,20 +152,20 @@ public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAt
 }
 
 [MemoryDiagnoser(false)]
-[MediumRunJob]
+[ShortRunJob]
 public class MyBenchs
 {
-    private readonly TestRequest _testRequest = new(1, 2, Fuck.From(3), SystemClock.Instance.GetCurrentInstant());
-    private readonly MessagePackSerializerOptions _options;
-    public MyBenchs()
-    {
-        StaticCompositeResolver.Instance.Register(
-            CompositeResolver.Create(new FuckMessagePackFormatter()),
-            NodatimeResolver.Instance,
-            ContractlessStandardResolver.Instance
-        );
-        _options = new(StaticCompositeResolver.Instance);
-    }
+    private readonly List<TestRequest> _testRequest = Enumerable.Range(1, 100).Select(i => new TestRequest(i * 1, i * 2, Guid.NewGuid(), DateTime.UtcNow)).ToList();
+    // private readonly MessagePackSerializerOptions _options;
+    // public MyBenchs()
+    // {
+    //     StaticCompositeResolver.Instance.Register(
+    //         CompositeResolver.Create(new FuckMessagePackFormatter()),
+    //         NodatimeResolver.Instance,
+    //         ContractlessStandardResolver.Instance
+    //     );
+    //     _options = new(StaticCompositeResolver.Instance);
+    // }
     [Benchmark(Baseline = true)]
     public byte[] SystemTextJson()
     {
@@ -170,6 +175,6 @@ public class MyBenchs
     [Benchmark]
     public byte[] MessagePack()
     {
-        return MessagePackSerializer.Serialize(_testRequest, _options);
+        return MessagePackSerializer.Serialize(_testRequest);
     }
 }
