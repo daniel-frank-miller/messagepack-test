@@ -50,7 +50,9 @@ public partial record TestRequest(
     [property: Key(2)]
     Guid Guid,
     [property: Key(3)]
-    DateTime Foo
+    DateTime Foo,
+    [property: Key(4)]
+    Fuck Fuck
 );
 [MemoryPackable]
 public partial record Another(
@@ -68,13 +70,11 @@ public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 {
     public void Serialize(ref MessagePackWriter writer, Fuck value, MessagePackSerializerOptions options)
     {
-        Console.WriteLine("Serializing");
         writer.Write(value.Value);
     }
 
     public Fuck Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
     {
-        Console.WriteLine("Deserializing");
         if (reader.TryReadNil()) throw new NotImplementedException(); // this must be some more general for sure :)
 
         options.Security.DepthStep(ref reader);
@@ -155,7 +155,7 @@ public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAt
 [ShortRunJob]
 public class MyBenchs
 {
-    private readonly List<TestRequest> _testRequest = Enumerable.Range(1, 100).Select(i => new TestRequest(i * 1, i * 2, Guid.NewGuid(), DateTime.UtcNow)).ToList();
+    private readonly List<TestRequest> _testRequest = Enumerable.Range(1, 100).Select(i => new TestRequest(i * 1, i * 2, Guid.NewGuid(), DateTime.UtcNow, Fuck.From(1213 * i))).ToList();
     private readonly MessagePackSerializerOptions _options;
     public MyBenchs()
     {
