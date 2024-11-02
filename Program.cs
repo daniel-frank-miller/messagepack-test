@@ -39,19 +39,12 @@ BenchmarkRunner.Run<MyBenchs>();
 // // Console.WriteLine($"mpD: {mpD}");
 
 Console.WriteLine("Hello, World!");
-
 [MemoryPackable]
-[MessagePackObject]
 public partial record TestRequest(
-    [property: Key(0)]
     int X,
-    [property: Key(1)]
     int Y,
-    [property: Key(2)]
     Guid Guid,
-    [property: Key(3)]
     DateTime Foo,
-    [property: Key(4)]
     [property: ValueObjectFormatter<Fuck, int>]
     Fuck Fuck
 );
@@ -163,7 +156,8 @@ public class MyBenchs
         StaticCompositeResolver.Instance.Register(
             CompositeResolver.Create(new FuckMessagePackFormatter()),
             NodatimeResolver.Instance,
-            ContractlessStandardResolver.Instance
+            ContractlessStandardResolver.Instance,
+            NativeGuidResolver.Instance
         );
         _options = new(StaticCompositeResolver.Instance);
     }
