@@ -36,6 +36,8 @@ using MemoryPack;
 /// </remarks>
 partial record TestRequest : IMemoryPackable<TestRequest>
 {
+    static readonly IMemoryPackFormatter<global::System.Net.IPAddress> __IpFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::IPAddressFormatter>(typeof(global::TestRequest).GetProperty("Ip", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
+    static readonly IMemoryPackFormatter<global::NodaTime.Instant> __NowFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Now", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
     static readonly IMemoryPackFormatter<global::Fuck> __FuckFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::FuckFormatter>(typeof(global::TestRequest).GetProperty("Fuck", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
 
     static partial void StaticConstructor();
@@ -73,8 +75,9 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         writer.WriteUnmanagedWithObjectHeader(8, value.@X, value.@Y);
         writer.WriteString(value.@Foo);
         writer.WritePackable(value.@Hi);
-        writer.WriteValue(value.@Ip);
-        writer.WriteUnmanaged(value.@Now, value.@SomeVo);
+        writer.WriteValueWithFormatter(__IpFormatter, value.@Ip);
+        writer.WriteValueWithFormatter(__NowFormatter, value.@Now);
+        writer.WriteUnmanaged(value.@SomeVo);
         writer.WriteValueWithFormatter(__FuckFormatter, value.@Fuck);
 
     END:
@@ -111,8 +114,9 @@ partial record TestRequest : IMemoryPackable<TestRequest>
                 reader.ReadUnmanaged(out __X, out __Y);
                 __Foo = reader.ReadString();
                 __Hi = reader.ReadPackable<global::Another>();
-                __Ip = reader.ReadValue<global::System.Net.IPAddress>();
-                reader.ReadUnmanaged(out __Now, out __SomeVo);
+                __Ip = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::System.Net.IPAddress>, global::System.Net.IPAddress>(__IpFormatter);
+                __Now = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant>, global::NodaTime.Instant>(__NowFormatter);
+                reader.ReadUnmanaged(out __SomeVo);
                 __Fuck = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::Fuck>, global::Fuck>(__FuckFormatter);
 
 
@@ -133,8 +137,8 @@ partial record TestRequest : IMemoryPackable<TestRequest>
                 reader.ReadUnmanaged(out __Y);
                 __Foo = reader.ReadString();
                 reader.ReadPackable(ref __Hi);
-                reader.ReadValue(ref __Ip);
-                reader.ReadUnmanaged(out __Now);
+                reader.ReadValueWithFormatter(__IpFormatter, ref __Ip);
+                reader.ReadValueWithFormatter(__NowFormatter, ref __Now);
                 reader.ReadUnmanaged(out __SomeVo);
                 reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck);
 
@@ -178,8 +182,8 @@ partial record TestRequest : IMemoryPackable<TestRequest>
             reader.ReadUnmanaged(out __Y); if (count == 2) goto SKIP_READ;
             __Foo = reader.ReadString(); if (count == 3) goto SKIP_READ;
             reader.ReadPackable(ref __Hi); if (count == 4) goto SKIP_READ;
-            reader.ReadValue(ref __Ip); if (count == 5) goto SKIP_READ;
-            reader.ReadUnmanaged(out __Now); if (count == 6) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__IpFormatter, ref __Ip); if (count == 5) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__NowFormatter, ref __Now); if (count == 6) goto SKIP_READ;
             reader.ReadUnmanaged(out __SomeVo); if (count == 7) goto SKIP_READ;
             reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck); if (count == 8) goto SKIP_READ;
 

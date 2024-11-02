@@ -37,8 +37,9 @@ public partial record TestRequest(
     int Y,
     string Foo,
     Another Hi,
-    [property: MemoryPackAllowSerialize]
+    [property: IPAddressFormatter]
     IPAddress Ip,
+    [property: InstantFormatter]
     Instant Now,
     SomeVo SomeVo,
     [property: FuckFormatter]
@@ -73,34 +74,35 @@ public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
     }
 }
 
-public class IPAddressFormatter : MemoryPackFormatter<IPAddress>
+public class IPAddressFormatter : MemoryPackCustomFormatterAttribute<IPAddress>
 {
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IPAddress? value)
+    public override IMemoryPackFormatter<IPAddress> GetFormatter() => new Formatter();
+
+    private class Formatter : MemoryPackFormatter<IPAddress>
     {
-        if (value == null)
+        public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IPAddress? value)
         {
-            writer.WriteNullObjectHeader();
-            return;
+            if (value == null)
+            {
+                writer.WriteNullObjectHeader();
+                return;
+            }
+
+            writer.WriteValue(value.ToString());
         }
 
-        writer.WriteValue(value.ToString());
-    }
-
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref IPAddress? value)
-    {
-        if (reader.PeekIsNull())
+        public override void Deserialize(ref MemoryPackReader reader, scoped ref IPAddress? value)
         {
-            reader.Advance(1); // skip null block
-            value = null;
-            return;
+            if (reader.PeekIsNull())
+            {
+                reader.Advance(1); // skip null block
+                value = null;
+                return;
+            }
+
+            value = IPAddress.Parse(reader.ReadString()!);
         }
-
-        value = IPAddress.Parse(reader.ReadString()!);
     }
-
-    [ModuleInitializer]
-    public static void Register() =>
-        MemoryPackFormatterProvider.Register(new IPAddressFormatter());
 }
 
 [AttributeUsage(AttributeTargets.All)]
@@ -118,6 +120,25 @@ public class FuckFormatter : MemoryPackCustomFormatterAttribute<Fuck>
         public override void Deserialize(ref MemoryPackReader reader, scoped ref Fuck value)
         {
             value = Fuck.From(reader.ReadValue<int>()!);
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.All)]
+public class InstantFormatter : MemoryPackCustomFormatterAttribute<Instant>
+{
+    public override IMemoryPackFormatter<Instant> GetFormatter() => new Formatter();
+
+    private class Formatter : MemoryPackFormatter<Instant>
+    {
+        public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Instant value)
+        {
+            writer.WriteValue(value.ToUnixTimeTicks());
+        }
+
+        public override void Deserialize(ref MemoryPackReader reader, scoped ref Instant value)
+        {
+            value = Instant.FromUnixTimeTicks(reader.ReadValue<long>());
         }
     }
 }
