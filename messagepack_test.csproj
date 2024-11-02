@@ -6,12 +6,13 @@
     <RootNamespace>messagepack_test</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-            <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>_Generated</CompilerGeneratedFilesOutputPath>
-  </PropertyGroup> <ItemGroup>
-        <!-- NOTE: We have to exclude the output of source generators from the compilation because we have set up source generators to emit to a custom directory inside the project (`_Generated`). — see https://andrewlock.net/creating-a-source-generator-part-6-saving-source-generator-output-in-source-control/#controlling-the-output-location -->
-        <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    </ItemGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>_Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- NOTE: We have to exclude the output of source generators from the compilation because we have set up source generators to emit to a custom directory inside the project (`_Generated`). — see https://andrewlock.net/creating-a-source-generator-part-6-saving-source-generator-output-in-source-control/#controlling-the-output-location -->
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />

@@ -36,6 +36,7 @@ using MemoryPack;
 /// </remarks>
 partial record TestRequest : IMemoryPackable<TestRequest>
 {
+    static readonly IMemoryPackFormatter<global::Fuck> __FuckFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::FuckFormatter>(typeof(global::TestRequest).GetProperty("Fuck", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
 
     static partial void StaticConstructor();
 
@@ -73,7 +74,8 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         writer.WriteString(value.@Foo);
         writer.WritePackable(value.@Hi);
         writer.WriteValue(value.@Ip);
-        writer.WriteUnmanaged(value.@Now, value.@SomeVo, value.@Fuck);
+        writer.WriteUnmanaged(value.@Now, value.@SomeVo);
+        writer.WriteValueWithFormatter(__FuckFormatter, value.@Fuck);
 
     END:
 
@@ -110,7 +112,8 @@ partial record TestRequest : IMemoryPackable<TestRequest>
                 __Foo = reader.ReadString();
                 __Hi = reader.ReadPackable<global::Another>();
                 __Ip = reader.ReadValue<global::System.Net.IPAddress>();
-                reader.ReadUnmanaged(out __Now, out __SomeVo, out __Fuck);
+                reader.ReadUnmanaged(out __Now, out __SomeVo);
+                __Fuck = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::Fuck>, global::Fuck>(__FuckFormatter);
 
 
                 goto NEW;
@@ -133,7 +136,7 @@ partial record TestRequest : IMemoryPackable<TestRequest>
                 reader.ReadValue(ref __Ip);
                 reader.ReadUnmanaged(out __Now);
                 reader.ReadUnmanaged(out __SomeVo);
-                reader.ReadUnmanaged(out __Fuck);
+                reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck);
 
                 goto SET;
             }
@@ -178,7 +181,7 @@ partial record TestRequest : IMemoryPackable<TestRequest>
             reader.ReadValue(ref __Ip); if (count == 5) goto SKIP_READ;
             reader.ReadUnmanaged(out __Now); if (count == 6) goto SKIP_READ;
             reader.ReadUnmanaged(out __SomeVo); if (count == 7) goto SKIP_READ;
-            reader.ReadUnmanaged(out __Fuck); if (count == 8) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck); if (count == 8) goto SKIP_READ;
 
     SKIP_READ:
             if (value == null)

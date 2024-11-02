@@ -14,20 +14,24 @@ var resolver = CompositeResolver.Create(
     ContractlessStandardResolver.Instance
 );
 MessagePackSerializer.DefaultOptions = new(resolver);
-var r = new TestRequest(1, 2, "fuck", new(321), IPAddress.Parse("1.2.3.4"), SystemClock.Instance.GetCurrentInstant(), new(100), Fuck.From(123));
+var r = new TestRequest(1, 2, "fuck", new(321), IPAddress.Parse("1.2.3.4"), SystemClock.Instance.GetCurrentInstant(), new(100), Fuck.From(3));
 Console.WriteLine($"r: {r}");
-var bytes = MessagePackSerializer.Serialize(r);
-Console.WriteLine($"bytes: {bytes.Length}");
-// var mpBytes = MemoryPackSerializer.Serialize(r);
-// Console.WriteLine($"mpBytes: {mpBytes.Length}");
-var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
-Console.WriteLine($"d: {d}");
-// var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
-// Console.WriteLine($"mpD: {mpD}");
+
+// var bytes = MessagePackSerializer.Serialize(r);
+// Console.WriteLine($"bytes: {bytes.Length}");
+
+var mpBytes = MemoryPackSerializer.Serialize(r);
+Console.WriteLine($"mpBytes: {mpBytes.Length}");
+
+// var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
+// Console.WriteLine($"d: {d}");
+
+var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
+Console.WriteLine($"mpD: {mpD}");
 
 Console.WriteLine("Hello, World!");
 
-// [MemoryPackable]
+[MemoryPackable]
 public partial record TestRequest(
     int X,
     int Y,
@@ -37,6 +41,7 @@ public partial record TestRequest(
     IPAddress Ip,
     Instant Now,
     SomeVo SomeVo,
+    [property: FuckFormatter]
     Fuck Fuck
 );
 [MemoryPackable]
@@ -49,8 +54,7 @@ public partial record Another(
 public readonly record struct SomeVo(int Value);
 
 [ValueObject<int>]
-[FuckFormatter]
-public readonly partial struct Fuck;
+public partial class Fuck;
 
 public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 {
@@ -108,7 +112,7 @@ public class FuckFormatter : MemoryPackCustomFormatterAttribute<Fuck>
     {
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Fuck value)
         {
-            writer.WriteValue(value.ToString());
+            writer.WriteValue(value.Value);
         }
 
         public override void Deserialize(ref MemoryPackReader reader, scoped ref Fuck value)

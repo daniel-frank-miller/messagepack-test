@@ -24,8 +24,7 @@
 [global::System.ComponentModel.TypeConverter(typeof(FuckTypeConverter))]
 [global::System.Diagnostics.DebuggerTypeProxyAttribute(typeof(FuckDebugView))]
 [global::System.Diagnostics.DebuggerDisplayAttribute("Underlying type: System.Int32, Value = { _value }")]
-// ReSharper disable once UnusedType.Global
-public readonly partial struct Fuck : global::System.IEquatable<Fuck>, global::System.IEquatable<System.Int32>, global::System.IComparable<Fuck>, global::System.IComparable, global::System.IParsable<Fuck>, global::System.ISpanParsable<Fuck>, global::System.IUtf8SpanParsable<Fuck>
+public partial class Fuck : global::System.IEquatable<Fuck>, global::System.IEquatable<System.Int32>, global::System.IComparable<Fuck>, global::System.IComparable, global::System.IParsable<Fuck>, global::System.ISpanParsable<Fuck>, global::System.IUtf8SpanParsable<Fuck>
 {
 #if DEBUG
 private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
@@ -37,10 +36,10 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
     /// <summary>
     /// Gets the underlying <see cref = "System.Int32"/> value if set, otherwise a <see cref = "Vogen.ValueObjectValidationException"/> is thrown.
     /// </summary>
-    public readonly System.Int32 Value
+    public System.Int32 Value
     {
-        [global::System.Diagnostics.DebuggerStepThroughAttribute]
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [global::System.Diagnostics.DebuggerStepThroughAttribute]
         get
         {
             EnsureInitialized();
@@ -58,7 +57,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
 #if !VOGEN_NO_VALIDATION
         _isInitialized = false;
 #endif
-        _value = default;
+        _value = default !;
     }
 
     [global::System.Diagnostics.DebuggerStepThroughAttribute]
@@ -123,13 +122,11 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #if VOGEN_NO_VALIDATION
 #pragma warning disable CS8775
-  public readonly bool IsInitialized() => true;
+  public bool IsInitialized() => true;
 #pragma warning restore CS8775
 #else
-    public readonly bool IsInitialized() => _isInitialized;
+    public bool IsInitialized() => _isInitialized;
 #endif
-    public static explicit operator Fuck(System.Int32 value) => From(value);
-    public static explicit operator System.Int32(Fuck value) => value.Value;
     // only called internally when something has been deserialized into
     // its primitive type.
     private static Fuck __Deserialize(System.Int32 value)
@@ -137,37 +134,55 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
         return new Fuck(value);
     }
 
-    public readonly global::System.Boolean Equals(Fuck other)
+    public global::System.Boolean Equals(Fuck? other)
     {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
         // It's possible to create uninitialized instances via converters such as EfCore (HasDefaultValue), which call Equals.
         // We treat anything uninitialized as not equal to anything, even other uninitialized instances of this type.
         if (!IsInitialized() || !other.IsInitialized())
             return false;
-        return global::System.Collections.Generic.EqualityComparer<System.Int32>.Default.Equals(Value, other.Value);
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return GetType() == other.GetType() && global::System.Collections.Generic.EqualityComparer<System.Int32>.Default.Equals(Value, other.Value);
     }
 
-    public global::System.Boolean Equals(Fuck other, global::System.Collections.Generic.IEqualityComparer<Fuck> comparer)
+    public global::System.Boolean Equals(Fuck? other, global::System.Collections.Generic.IEqualityComparer<Fuck> comparer)
     {
         return comparer.Equals(this, other);
     }
 
-    public readonly global::System.Boolean Equals(System.Int32 primitive)
+    public global::System.Boolean Equals(System.Int32 primitive)
     {
         return Value.Equals(primitive);
     }
 
-    public readonly override global::System.Boolean Equals(global::System.Object? obj)
+    public override global::System.Boolean Equals(global::System.Object? obj)
     {
-        return obj is Fuck && Equals((Fuck)obj);
+        return Equals(obj as Fuck);
     }
 
-    public static global::System.Boolean operator ==(Fuck left, Fuck right) => left.Equals(right);
-    public static global::System.Boolean operator !=(Fuck left, Fuck right) => !(left == right);
-    public static global::System.Boolean operator ==(Fuck left, System.Int32 right) => left.Value.Equals(right);
-    public static global::System.Boolean operator ==(System.Int32 left, Fuck right) => right.Value.Equals(left);
-    public static global::System.Boolean operator !=(System.Int32 left, Fuck right) => !(left == right);
-    public static global::System.Boolean operator !=(Fuck left, System.Int32 right) => !(left == right);
-    public int CompareTo(Fuck other) => Value.CompareTo(other.Value);
+    public static global::System.Boolean operator ==(Fuck? left, Fuck? right) => Equals(left, right);
+    public static global::System.Boolean operator !=(Fuck? left, Fuck? right) => !Equals(left, right);
+    public static global::System.Boolean operator ==(Fuck? left, System.Int32 right) => left?.Value.Equals(right) ?? false;
+    public static global::System.Boolean operator ==(System.Int32 left, Fuck? right) => right?.Value.Equals(left) ?? false;
+    public static global::System.Boolean operator !=(System.Int32 left, Fuck? right) => !(left == right);
+    public static global::System.Boolean operator !=(Fuck? left, System.Int32 right) => !(left == right);
+    public static explicit operator Fuck(System.Int32 value) => From(value);
+    public static explicit operator System.Int32(Fuck value) => value.Value;
+    public int CompareTo(Fuck? other)
+    {
+        if (other is null)
+            return 1;
+        return Value.CompareTo(other.Value);
+    }
+
     public int CompareTo(object? other)
     {
         if (other is null)
@@ -196,7 +211,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -218,7 +233,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -240,7 +255,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -262,7 +277,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -284,7 +299,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -306,7 +321,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -328,7 +343,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -350,7 +365,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -372,7 +387,7 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             return true;
         }
 
-        result = default;
+        result = default !;
         return false;
     }
 
@@ -480,15 +495,19 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
         return From(r);
     }
 
-    public readonly override global::System.Int32 GetHashCode()
+    public override global::System.Int32 GetHashCode()
     {
-        return global::System.Collections.Generic.EqualityComparer<System.Int32>.Default.GetHashCode(Value);
+        unchecked // Overflow is fine, just wrap
+        {
+            global::System.Int32 hash = (global::System.Int32)2166136261;
+            hash = (hash * 16777619) ^ GetType().GetHashCode();
+            hash = (hash * 16777619) ^ global::System.Collections.Generic.EqualityComparer<System.Int32>.Default.GetHashCode(Value);
+            return hash;
+        }
     }
 
-    /// <summary>Returns the string representation of the underlying <see cref = "System.Int32"/>.</summary>
-    public readonly override global::System.String ToString() => IsInitialized() ? Value.ToString() ?? "" : "[UNINITIALIZED]";
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private readonly void EnsureInitialized()
+    private void EnsureInitialized()
     {
         if (!IsInitialized())
         {
@@ -500,6 +519,8 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
         }
     }
 
+    /// <summary>Returns the string representation of the underlying <see cref = "System.Int32"/>.</summary>
+    public override global::System.String ToString() => IsInitialized() ? Value.ToString() ?? "" : "[UNINITIALIZED]";
 #nullable disable
     /// <summary>
     /// Converts a Fuck to or from JSON.
@@ -580,7 +601,6 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
     }
 
 #nullable restore
-#nullable disable
     internal sealed class FuckDebugView
     {
         private readonly Fuck _t;
@@ -589,16 +609,13 @@ private readonly global::System.Diagnostics.StackTrace? _stackTrace = null!;
             _t = t;
         }
 
-        public global::System.Boolean IsInitialized => _t.IsInitialized();
         public global::System.String UnderlyingType => "System.Int32";
-        public global::System.String Value => _t.IsInitialized() ? _t._value.ToString() : "[not initialized]";
-#if DEBUG
-        public global::System.String CreatedWith => _t._stackTrace?.ToString() ?? "the From method";
-#endif
-        public global::System.String Conversions => @"Default";
+        public System.Int32 Value => _t.Value;
+        public global::System.String Conversions => @"[global::System.Text.Json.Serialization.JsonConverter(typeof(FuckSystemTextJsonConverter))]
+[global::System.ComponentModel.TypeConverter(typeof(FuckTypeConverter))]
+";
     }
 
-#nullable restore
     static class ThrowHelper
     {
 #if NETCOREAPP3_0_OR_GREATER
