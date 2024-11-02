@@ -26,10 +26,15 @@ using MemoryPack;
 /// <code>
 /// <b>int</b> X<br/>
 /// <b>int</b> Y<br/>
+/// <b>string</b> Foo<br/>
+/// <b>Another</b> Hi<br/>
+/// <b>System.Net.IPAddress</b> Ip<br/>
 /// <b>NodaTime.Instant</b> Now<br/>
+/// <b>SomeVo</b> SomeVo<br/>
+/// <b>Fuck</b> Fuck<br/>
 /// </code>
 /// </remarks>
-partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IFixedSizeMemoryPackable
+partial record TestRequest : IMemoryPackable<TestRequest>
 {
 
     static partial void StaticConstructor();
@@ -39,9 +44,6 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
         global::MemoryPack.MemoryPackFormatterProvider.Register<TestRequest>();
         StaticConstructor();
     }
-
-    [global::MemoryPack.Internal.Preserve]
-    static int global::MemoryPack.IFixedSizeMemoryPackable.Size => 1 + System.Runtime.CompilerServices.Unsafe.SizeOf<int>() + System.Runtime.CompilerServices.Unsafe.SizeOf<int>() + System.Runtime.CompilerServices.Unsafe.SizeOf<global::NodaTime.Instant>();
 
     [global::MemoryPack.Internal.Preserve]
     static void IMemoryPackFormatterRegister.RegisterFormatter()
@@ -67,7 +69,11 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
             goto END;
         }
 
-        writer.WriteUnmanagedWithObjectHeader(3, value.@X, value.@Y, value.@Now);
+        writer.WriteUnmanagedWithObjectHeader(8, value.@X, value.@Y);
+        writer.WriteString(value.@Foo);
+        writer.WritePackable(value.@Hi);
+        writer.WriteValue(value.@Ip);
+        writer.WriteUnmanaged(value.@Now, value.@SomeVo, value.@Fuck);
 
     END:
 
@@ -88,14 +94,23 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
 
         int __X;
         int __Y;
+        string __Foo;
+        global::Another __Hi;
+        global::System.Net.IPAddress __Ip;
         global::NodaTime.Instant __Now;
+        global::SomeVo __SomeVo;
+        global::Fuck __Fuck;
 
         
-        if (count == 3)
+        if (count == 8)
         {
             if (value == null)
             {
-                reader.ReadUnmanaged(out __X, out __Y, out __Now);
+                reader.ReadUnmanaged(out __X, out __Y);
+                __Foo = reader.ReadString();
+                __Hi = reader.ReadPackable<global::Another>();
+                __Ip = reader.ReadValue<global::System.Net.IPAddress>();
+                reader.ReadUnmanaged(out __Now, out __SomeVo, out __Fuck);
 
 
                 goto NEW;
@@ -104,19 +119,29 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
             {
                 __X = value.@X;
                 __Y = value.@Y;
+                __Foo = value.@Foo;
+                __Hi = value.@Hi;
+                __Ip = value.@Ip;
                 __Now = value.@Now;
+                __SomeVo = value.@SomeVo;
+                __Fuck = value.@Fuck;
 
                 reader.ReadUnmanaged(out __X);
                 reader.ReadUnmanaged(out __Y);
+                __Foo = reader.ReadString();
+                reader.ReadPackable(ref __Hi);
+                reader.ReadValue(ref __Ip);
                 reader.ReadUnmanaged(out __Now);
+                reader.ReadUnmanaged(out __SomeVo);
+                reader.ReadUnmanaged(out __Fuck);
 
                 goto SET;
             }
 
         }
-        else if (count > 3)
+        else if (count > 8)
         {
-            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 3, count);
+            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 8, count);
             goto READ_END;
         }
         else
@@ -125,20 +150,35 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
             {
                __X = default!;
                __Y = default!;
+               __Foo = default!;
+               __Hi = default!;
+               __Ip = default!;
                __Now = default!;
+               __SomeVo = default!;
+               __Fuck = default!;
             }
             else
             {
                __X = value.@X;
                __Y = value.@Y;
+               __Foo = value.@Foo;
+               __Hi = value.@Hi;
+               __Ip = value.@Ip;
                __Now = value.@Now;
+               __SomeVo = value.@SomeVo;
+               __Fuck = value.@Fuck;
             }
 
 
             if (count == 0) goto SKIP_READ;
             reader.ReadUnmanaged(out __X); if (count == 1) goto SKIP_READ;
             reader.ReadUnmanaged(out __Y); if (count == 2) goto SKIP_READ;
-            reader.ReadUnmanaged(out __Now); if (count == 3) goto SKIP_READ;
+            __Foo = reader.ReadString(); if (count == 3) goto SKIP_READ;
+            reader.ReadPackable(ref __Hi); if (count == 4) goto SKIP_READ;
+            reader.ReadValue(ref __Ip); if (count == 5) goto SKIP_READ;
+            reader.ReadUnmanaged(out __Now); if (count == 6) goto SKIP_READ;
+            reader.ReadUnmanaged(out __SomeVo); if (count == 7) goto SKIP_READ;
+            reader.ReadUnmanaged(out __Fuck); if (count == 8) goto SKIP_READ;
 
     SKIP_READ:
             if (value == null)
@@ -158,7 +198,7 @@ partial record TestRequest : IMemoryPackable<TestRequest>, global::MemoryPack.IF
         goto READ_END;
 
     NEW:
-        value = new TestRequest(__X, __Y, __Now)
+        value = new TestRequest(__X, __Y, __Foo, __Hi, __Ip, __Now, __SomeVo, __Fuck)
         {
 
         };
