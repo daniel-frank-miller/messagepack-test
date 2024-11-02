@@ -40,7 +40,7 @@ BenchmarkRunner.Run<MyBenchs>();
 
 Console.WriteLine("Hello, World!");
 
-// [MemoryPackable]
+[MemoryPackable]
 [MessagePackObject]
 public partial record TestRequest(
     [property: Key(0)]
@@ -52,6 +52,7 @@ public partial record TestRequest(
     [property: Key(3)]
     DateTime Foo,
     [property: Key(4)]
+    [property: ValueObjectFormatter<Fuck, int>]
     Fuck Fuck
 );
 [MemoryPackable]
@@ -152,7 +153,7 @@ public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAt
 }
 
 [MemoryDiagnoser(false)]
-[ShortRunJob]
+[MediumRunJob]
 public class MyBenchs
 {
     private readonly List<TestRequest> _testRequest = Enumerable.Range(1, 100).Select(i => new TestRequest(i * 1, i * 2, Guid.NewGuid(), DateTime.UtcNow, Fuck.From(1213 * i))).ToList();
@@ -176,5 +177,11 @@ public class MyBenchs
     public byte[] MessagePack()
     {
         return MessagePackSerializer.Serialize(_testRequest, _options);
+    }
+
+    [Benchmark]
+    public byte[] MemoryPack()
+    {
+        return MemoryPackSerializer.Serialize(_testRequest);
     }
 }

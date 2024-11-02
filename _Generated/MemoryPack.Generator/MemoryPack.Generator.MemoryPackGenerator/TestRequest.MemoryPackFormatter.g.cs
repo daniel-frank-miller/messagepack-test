@@ -24,14 +24,16 @@ using MemoryPack;
 /// <remarks>
 /// MemoryPack GenerateType: Object<br/>
 /// <code>
-/// <b>NodaTime.Instant</b> Instant1<br/>
-/// <b>NodaTime.Instant?</b> Instant2<br/>
+/// <b>int</b> X<br/>
+/// <b>int</b> Y<br/>
+/// <b>System.Guid</b> Guid<br/>
+/// <b>System.DateTime</b> Foo<br/>
+/// <b>Fuck</b> Fuck<br/>
 /// </code>
 /// </remarks>
 partial record TestRequest : IMemoryPackable<TestRequest>
 {
-    static readonly IMemoryPackFormatter<global::NodaTime.Instant> __Instant1Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Instant1", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
-    static readonly IMemoryPackFormatter<global::NodaTime.Instant?> __Instant2Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Instant2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
+    static readonly IMemoryPackFormatter<global::Fuck> __FuckFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::ValueObjectFormatter<global::Fuck, int>>(typeof(global::TestRequest).GetProperty("Fuck", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
 
     static partial void StaticConstructor();
 
@@ -52,10 +54,6 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         {
             global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.ArrayFormatter<TestRequest>());
         }
-        if (!global::MemoryPack.MemoryPackFormatterProvider.IsRegistered<global::NodaTime.Instant?>())
-        {
-            global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.NullableFormatter<global::NodaTime.Instant>());
-        }
 
     }
 
@@ -69,9 +67,8 @@ partial record TestRequest : IMemoryPackable<TestRequest>
             goto END;
         }
 
-        writer.WriteObjectHeader(2);
-        writer.WriteValueWithFormatter(__Instant1Formatter, value.@Instant1);
-        writer.WriteValueWithFormatter(__Instant2Formatter, value.@Instant2);
+        writer.WriteUnmanagedWithObjectHeader(5, value.@X, value.@Y, value.@Guid, value.@Foo);
+        writer.WriteValueWithFormatter(__FuckFormatter, value.@Fuck);
 
     END:
 
@@ -90,54 +87,72 @@ partial record TestRequest : IMemoryPackable<TestRequest>
 
 
 
-        global::NodaTime.Instant __Instant1;
-        global::NodaTime.Instant? __Instant2;
+        int __X;
+        int __Y;
+        global::System.Guid __Guid;
+        global::System.DateTime __Foo;
+        global::Fuck __Fuck;
 
         
-        if (count == 2)
+        if (count == 5)
         {
             if (value == null)
             {
-                __Instant1 = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant>, global::NodaTime.Instant>(__Instant1Formatter);
-                __Instant2 = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant?>, global::NodaTime.Instant?>(__Instant2Formatter);
+                reader.ReadUnmanaged(out __X, out __Y, out __Guid, out __Foo);
+                __Fuck = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::Fuck>, global::Fuck>(__FuckFormatter);
 
 
                 goto NEW;
             }
             else
             {
-                __Instant1 = value.@Instant1;
-                __Instant2 = value.@Instant2;
+                __X = value.@X;
+                __Y = value.@Y;
+                __Guid = value.@Guid;
+                __Foo = value.@Foo;
+                __Fuck = value.@Fuck;
 
-                reader.ReadValueWithFormatter(__Instant1Formatter, ref __Instant1);
-                reader.ReadValueWithFormatter(__Instant2Formatter, ref __Instant2);
+                reader.ReadUnmanaged(out __X);
+                reader.ReadUnmanaged(out __Y);
+                reader.ReadUnmanaged(out __Guid);
+                reader.ReadUnmanaged(out __Foo);
+                reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck);
 
                 goto SET;
             }
 
         }
-        else if (count > 2)
+        else if (count > 5)
         {
-            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 2, count);
+            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 5, count);
             goto READ_END;
         }
         else
         {
             if (value == null)
             {
-               __Instant1 = default!;
-               __Instant2 = default!;
+               __X = default!;
+               __Y = default!;
+               __Guid = default!;
+               __Foo = default!;
+               __Fuck = default!;
             }
             else
             {
-               __Instant1 = value.@Instant1;
-               __Instant2 = value.@Instant2;
+               __X = value.@X;
+               __Y = value.@Y;
+               __Guid = value.@Guid;
+               __Foo = value.@Foo;
+               __Fuck = value.@Fuck;
             }
 
 
             if (count == 0) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__Instant1Formatter, ref __Instant1); if (count == 1) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__Instant2Formatter, ref __Instant2); if (count == 2) goto SKIP_READ;
+            reader.ReadUnmanaged(out __X); if (count == 1) goto SKIP_READ;
+            reader.ReadUnmanaged(out __Y); if (count == 2) goto SKIP_READ;
+            reader.ReadUnmanaged(out __Guid); if (count == 3) goto SKIP_READ;
+            reader.ReadUnmanaged(out __Foo); if (count == 4) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck); if (count == 5) goto SKIP_READ;
 
     SKIP_READ:
             if (value == null)
@@ -157,7 +172,7 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         goto READ_END;
 
     NEW:
-        value = new TestRequest(__Instant1, __Instant2)
+        value = new TestRequest(__X, __Y, __Guid, __Foo, __Fuck)
         {
 
         };
