@@ -54,7 +54,7 @@ public partial record Another(
 public readonly record struct SomeVo(int Value);
 
 [ValueObject<int>]
-public partial class Fuck;
+public readonly partial struct Fuck;
 
 public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 {
