@@ -1,6 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using MemoryPack;
 using MessagePack;
 using MessagePack.Formatters;
@@ -8,25 +11,32 @@ using MessagePack.NodaTime;
 using MessagePack.Resolvers;
 using NodaTime;
 using Vogen;
-var resolver = CompositeResolver.Create(
-    NodatimeResolver.Instance,
-    ContractlessStandardResolver.Instance
-);
-MessagePackSerializer.DefaultOptions = new(resolver);
-var r = new TestRequest(1, 2, "fuck", new(321), IPAddress.Parse("1.2.3.4"), SystemClock.Instance.GetCurrentInstant(), null, new(100), Fuck.From(3), Fuck.From(321));
-Console.WriteLine($"r: {r}");
 
-var bytes = MessagePackSerializer.Serialize(r);
-Console.WriteLine($"bytes: {bytes.Length}");
+BenchmarkRunner.Run<MyBenchs>();
+// var resolver = CompositeResolver.Create(
+//     NodatimeResolver.Instance,
+//     ContractlessStandardResolver.Instance
+// );
+// StaticCompositeResolver.Instance.Register(
+//     CompositeResolver.Create(new FuckMessagePackFormatter()),
+//     NodatimeResolver.Instance,
+//     ContractlessStandardResolver.Instance
+// );
+// MessagePackSerializer.DefaultOptions = new(StaticCompositeResolver.Instance);
+// var r = new TestRequest(1, 2, Fuck.From(3), SystemClock.Instance.GetCurrentInstant());
+// Console.WriteLine($"r: {r}");
 
-// var mpBytes = MemoryPackSerializer.Serialize(r);
-// Console.WriteLine($"mpBytes: {mpBytes.Length}");
+// var bytes = MessagePackSerializer.Serialize(r);
+// Console.WriteLine($"bytes: {bytes.Length}");
 
-var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
-Console.WriteLine($"d: {d}");
+// // var mpBytes = MemoryPackSerializer.Serialize(r);
+// // Console.WriteLine($"mpBytes: {mpBytes.Length}");
 
-// var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
-// Console.WriteLine($"mpD: {mpD}");
+// var d = MessagePackSerializer.Deserialize<TestRequest>(bytes);
+// Console.WriteLine($"d: {d}");
+
+// // var mpD = MemoryPackSerializer.Deserialize<TestRequest>(mpBytes);
+// // Console.WriteLine($"mpD: {mpD}");
 
 Console.WriteLine("Hello, World!");
 
@@ -34,18 +44,8 @@ Console.WriteLine("Hello, World!");
 public partial record TestRequest(
     int X,
     int Y,
-    string Foo,
-    Another Hi,
-    [property: IPAddressFormatter]
-    IPAddress Ip,
-    [property: InstantFormatter]
-    Instant Now,
-    [property: InstantFormatter]
-    Instant? Now2,
-    SomeVo SomeVo,
-    [property: ValueObjectFormatter<Fuck, int>]
     Fuck Fuck,
-    Fuck? Fuck2
+    Instant Now
 );
 [MemoryPackable]
 public partial record Another(
@@ -61,10 +61,15 @@ public readonly partial struct Fuck : IValueObject<Fuck, int>;
 
 public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 {
-    public void Serialize(ref MessagePackWriter writer, Fuck value, MessagePackSerializerOptions options) => writer.Write(value.Value);
+    public void Serialize(ref MessagePackWriter writer, Fuck value, MessagePackSerializerOptions options)
+    {
+        Console.WriteLine("Serializing");
+        writer.Write(value.Value);
+    }
 
     public Fuck Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
     {
+        Console.WriteLine("Deserializing");
         if (reader.TryReadNil()) throw new NotImplementedException(); // this must be some more general for sure :)
 
         options.Security.DepthStep(ref reader);
@@ -73,6 +78,12 @@ public class FuckMessagePackFormatter() : IMessagePackFormatter<Fuck>
 
         reader.Depth--;
         return Fuck.From(value!);
+    }
+
+    [ModuleInitializer]
+    public static void Register()
+    {
+        Console.WriteLine("Registered");
     }
 }
 
@@ -135,30 +146,30 @@ public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAt
     }
 }
 
-[AttributeUsage(AttributeTargets.All)]
-public class InstantFormatter : MemoryPackCustomFormatterAttribute<Instant>
+[MemoryDiagnoser(false)]
+[MediumRunJob]
+public class MyBenchs
 {
-    public override IMemoryPackFormatter<Instant> GetFormatter() => new Formatter();
-
-    private class Formatter : MemoryPackFormatter<Instant>
+    private readonly TestRequest _testRequest = new(1, 2, Fuck.From(3), SystemClock.Instance.GetCurrentInstant());
+    private readonly MessagePackSerializerOptions _options;
+    public MyBenchs()
     {
-        public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Instant value)
-        {
-            writer.WriteValue(value.ToUnixTimeTicks());
-        }
-
-        public override void Deserialize(ref MemoryPackReader reader, scoped ref Instant value)
-        {
-            value = Instant.FromUnixTimeTicks(reader.ReadValue<long>());
-        }
+        StaticCompositeResolver.Instance.Register(
+            CompositeResolver.Create(new FuckMessagePackFormatter()),
+            NodatimeResolver.Instance,
+            ContractlessStandardResolver.Instance
+        );
+        _options = new(StaticCompositeResolver.Instance);
     }
-}
-
-public class Foo
-{
-    [ModuleInitializer]
-    public static void Register()
+    [Benchmark(Baseline = true)]
+    public byte[] SystemTextJson()
     {
-        Console.WriteLine("hahaha I ran");
+        return JsonSerializer.SerializeToUtf8Bytes(_testRequest);
+    }
+
+    [Benchmark]
+    public byte[] MessagePack()
+    {
+        return MessagePackSerializer.Serialize(_testRequest, _options);
     }
 }

@@ -24,24 +24,14 @@ using MemoryPack;
 /// <remarks>
 /// MemoryPack GenerateType: Object<br/>
 /// <code>
-/// <b>int</b> X<br/>
-/// <b>int</b> Y<br/>
-/// <b>string</b> Foo<br/>
-/// <b>Another</b> Hi<br/>
-/// <b>System.Net.IPAddress</b> Ip<br/>
-/// <b>NodaTime.Instant</b> Now<br/>
-/// <b>NodaTime.Instant?</b> Now2<br/>
-/// <b>SomeVo</b> SomeVo<br/>
-/// <b>Fuck</b> Fuck<br/>
-/// <b>Fuck?</b> Fuck2<br/>
+/// <b>NodaTime.Instant</b> Instant1<br/>
+/// <b>NodaTime.Instant?</b> Instant2<br/>
 /// </code>
 /// </remarks>
 partial record TestRequest : IMemoryPackable<TestRequest>
 {
-    static readonly IMemoryPackFormatter<global::System.Net.IPAddress> __IpFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::IPAddressFormatter>(typeof(global::TestRequest).GetProperty("Ip", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
-    static readonly IMemoryPackFormatter<global::NodaTime.Instant> __NowFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Now", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
-    static readonly IMemoryPackFormatter<global::NodaTime.Instant?> __Now2Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Now2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
-    static readonly IMemoryPackFormatter<global::Fuck> __FuckFormatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::ValueObjectFormatter<global::Fuck, int>>(typeof(global::TestRequest).GetProperty("Fuck", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
+    static readonly IMemoryPackFormatter<global::NodaTime.Instant> __Instant1Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Instant1", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
+    static readonly IMemoryPackFormatter<global::NodaTime.Instant?> __Instant2Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<global::InstantFormatter>(typeof(global::TestRequest).GetProperty("Instant2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();
 
     static partial void StaticConstructor();
 
@@ -66,10 +56,6 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         {
             global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.NullableFormatter<global::NodaTime.Instant>());
         }
-        if (!global::MemoryPack.MemoryPackFormatterProvider.IsRegistered<global::Fuck?>())
-        {
-            global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.NullableFormatter<global::Fuck>());
-        }
 
     }
 
@@ -83,15 +69,9 @@ partial record TestRequest : IMemoryPackable<TestRequest>
             goto END;
         }
 
-        writer.WriteUnmanagedWithObjectHeader(10, value.@X, value.@Y);
-        writer.WriteString(value.@Foo);
-        writer.WritePackable(value.@Hi);
-        writer.WriteValueWithFormatter(__IpFormatter, value.@Ip);
-        writer.WriteValueWithFormatter(__NowFormatter, value.@Now);
-        writer.WriteValueWithFormatter(__Now2Formatter, value.@Now2);
-        writer.WriteUnmanaged(value.@SomeVo);
-        writer.WriteValueWithFormatter(__FuckFormatter, value.@Fuck);
-        writer.DangerousWriteUnmanaged(value.@Fuck2);
+        writer.WriteObjectHeader(2);
+        writer.WriteValueWithFormatter(__Instant1Formatter, value.@Instant1);
+        writer.WriteValueWithFormatter(__Instant2Formatter, value.@Instant2);
 
     END:
 
@@ -110,109 +90,54 @@ partial record TestRequest : IMemoryPackable<TestRequest>
 
 
 
-        int __X;
-        int __Y;
-        string __Foo;
-        global::Another __Hi;
-        global::System.Net.IPAddress __Ip;
-        global::NodaTime.Instant __Now;
-        global::NodaTime.Instant? __Now2;
-        global::SomeVo __SomeVo;
-        global::Fuck __Fuck;
-        global::Fuck? __Fuck2;
+        global::NodaTime.Instant __Instant1;
+        global::NodaTime.Instant? __Instant2;
 
         
-        if (count == 10)
+        if (count == 2)
         {
             if (value == null)
             {
-                reader.ReadUnmanaged(out __X, out __Y);
-                __Foo = reader.ReadString();
-                __Hi = reader.ReadPackable<global::Another>();
-                __Ip = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::System.Net.IPAddress>, global::System.Net.IPAddress>(__IpFormatter);
-                __Now = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant>, global::NodaTime.Instant>(__NowFormatter);
-                __Now2 = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant?>, global::NodaTime.Instant?>(__Now2Formatter);
-                reader.ReadUnmanaged(out __SomeVo);
-                __Fuck = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::Fuck>, global::Fuck>(__FuckFormatter);
-                reader.DangerousReadUnmanaged(out __Fuck2);
+                __Instant1 = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant>, global::NodaTime.Instant>(__Instant1Formatter);
+                __Instant2 = reader.ReadValueWithFormatter<IMemoryPackFormatter<global::NodaTime.Instant?>, global::NodaTime.Instant?>(__Instant2Formatter);
 
 
                 goto NEW;
             }
             else
             {
-                __X = value.@X;
-                __Y = value.@Y;
-                __Foo = value.@Foo;
-                __Hi = value.@Hi;
-                __Ip = value.@Ip;
-                __Now = value.@Now;
-                __Now2 = value.@Now2;
-                __SomeVo = value.@SomeVo;
-                __Fuck = value.@Fuck;
-                __Fuck2 = value.@Fuck2;
+                __Instant1 = value.@Instant1;
+                __Instant2 = value.@Instant2;
 
-                reader.ReadUnmanaged(out __X);
-                reader.ReadUnmanaged(out __Y);
-                __Foo = reader.ReadString();
-                reader.ReadPackable(ref __Hi);
-                reader.ReadValueWithFormatter(__IpFormatter, ref __Ip);
-                reader.ReadValueWithFormatter(__NowFormatter, ref __Now);
-                reader.ReadValueWithFormatter(__Now2Formatter, ref __Now2);
-                reader.ReadUnmanaged(out __SomeVo);
-                reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck);
-                reader.DangerousReadUnmanaged(out __Fuck2);
+                reader.ReadValueWithFormatter(__Instant1Formatter, ref __Instant1);
+                reader.ReadValueWithFormatter(__Instant2Formatter, ref __Instant2);
 
                 goto SET;
             }
 
         }
-        else if (count > 10)
+        else if (count > 2)
         {
-            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 10, count);
+            MemoryPackSerializationException.ThrowInvalidPropertyCount(typeof(TestRequest), 2, count);
             goto READ_END;
         }
         else
         {
             if (value == null)
             {
-               __X = default!;
-               __Y = default!;
-               __Foo = default!;
-               __Hi = default!;
-               __Ip = default!;
-               __Now = default!;
-               __Now2 = default!;
-               __SomeVo = default!;
-               __Fuck = default!;
-               __Fuck2 = default!;
+               __Instant1 = default!;
+               __Instant2 = default!;
             }
             else
             {
-               __X = value.@X;
-               __Y = value.@Y;
-               __Foo = value.@Foo;
-               __Hi = value.@Hi;
-               __Ip = value.@Ip;
-               __Now = value.@Now;
-               __Now2 = value.@Now2;
-               __SomeVo = value.@SomeVo;
-               __Fuck = value.@Fuck;
-               __Fuck2 = value.@Fuck2;
+               __Instant1 = value.@Instant1;
+               __Instant2 = value.@Instant2;
             }
 
 
             if (count == 0) goto SKIP_READ;
-            reader.ReadUnmanaged(out __X); if (count == 1) goto SKIP_READ;
-            reader.ReadUnmanaged(out __Y); if (count == 2) goto SKIP_READ;
-            __Foo = reader.ReadString(); if (count == 3) goto SKIP_READ;
-            reader.ReadPackable(ref __Hi); if (count == 4) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__IpFormatter, ref __Ip); if (count == 5) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__NowFormatter, ref __Now); if (count == 6) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__Now2Formatter, ref __Now2); if (count == 7) goto SKIP_READ;
-            reader.ReadUnmanaged(out __SomeVo); if (count == 8) goto SKIP_READ;
-            reader.ReadValueWithFormatter(__FuckFormatter, ref __Fuck); if (count == 9) goto SKIP_READ;
-            reader.DangerousReadUnmanaged(out __Fuck2); if (count == 10) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__Instant1Formatter, ref __Instant1); if (count == 1) goto SKIP_READ;
+            reader.ReadValueWithFormatter(__Instant2Formatter, ref __Instant2); if (count == 2) goto SKIP_READ;
 
     SKIP_READ:
             if (value == null)
@@ -232,7 +157,7 @@ partial record TestRequest : IMemoryPackable<TestRequest>
         goto READ_END;
 
     NEW:
-        value = new TestRequest(__X, __Y, __Foo, __Hi, __Ip, __Now, __Now2, __SomeVo, __Fuck, __Fuck2)
+        value = new TestRequest(__Instant1, __Instant2)
         {
 
         };
