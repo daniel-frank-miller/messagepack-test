@@ -156,16 +156,16 @@ public class ValueObjectFormatter<TVo, TPrimitive> : MemoryPackCustomFormatterAt
 public class MyBenchs
 {
     private readonly List<TestRequest> _testRequest = Enumerable.Range(1, 100).Select(i => new TestRequest(i * 1, i * 2, Guid.NewGuid(), DateTime.UtcNow)).ToList();
-    // private readonly MessagePackSerializerOptions _options;
-    // public MyBenchs()
-    // {
-    //     StaticCompositeResolver.Instance.Register(
-    //         CompositeResolver.Create(new FuckMessagePackFormatter()),
-    //         NodatimeResolver.Instance,
-    //         ContractlessStandardResolver.Instance
-    //     );
-    //     _options = new(StaticCompositeResolver.Instance);
-    // }
+    private readonly MessagePackSerializerOptions _options;
+    public MyBenchs()
+    {
+        StaticCompositeResolver.Instance.Register(
+            CompositeResolver.Create(new FuckMessagePackFormatter()),
+            NodatimeResolver.Instance,
+            ContractlessStandardResolver.Instance
+        );
+        _options = new(StaticCompositeResolver.Instance);
+    }
     [Benchmark(Baseline = true)]
     public byte[] SystemTextJson()
     {
@@ -175,6 +175,6 @@ public class MyBenchs
     [Benchmark]
     public byte[] MessagePack()
     {
-        return MessagePackSerializer.Serialize(_testRequest);
+        return MessagePackSerializer.Serialize(_testRequest, _options);
     }
 }
